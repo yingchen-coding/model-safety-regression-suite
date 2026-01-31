@@ -22,6 +22,17 @@ Safety can quietly degrade as models gain capability. A model that passes absolu
 
 ---
 
+## CI/CD Integration
+
+```bash
+# Release gating in CI pipeline
+python run_regression.py --baseline $BASE_MODEL --candidate $NEW_MODEL || exit 1
+```
+
+Exit codes: `0` = OK, `1` = BLOCK, `2` = WARN
+
+---
+
 ## Quick Start
 
 ```bash

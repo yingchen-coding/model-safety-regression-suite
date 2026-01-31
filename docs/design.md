@@ -126,6 +126,12 @@ Thresholds are configurable via YAML to allow tuning for different use cases.
 2. **Statistical significance**: Run multiple trials, compute confidence intervals
 3. **Threshold learning**: Calibrate thresholds from historical data
 4. **Ensemble evaluation**: Multiple evaluators with voting
+5. **Human review queue**: BLOCK decisions routed to safety reviewers
+6. **Audit logs**: Full traceability of release decisions
+7. **Rollback triggers**: Automatic rollback if post-release metrics degrade
+8. **Cost-aware sampling**: Adaptive scenario selection to minimize API costs
+9. **Slack/PagerDuty integration**: Real-time alerts for regressions
+10. **Dashboard**: Historical regression trends across releases
 
 ## Integration Points
 
