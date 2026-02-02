@@ -244,6 +244,38 @@ The goal is not just to evaluate safety, but to **prevent safety regressions fro
 
 ---
 
+## Noise Handling
+
+Metric variance is expected. The suite handles noise through:
+
+### Statistical Robustness
+
+- **Multi-seed averaging**: Metrics are averaged over N evaluation seeds
+- **Confidence intervals**: Report includes variance estimates
+- **Outlier detection**: Extreme single-run deltas are flagged
+
+### Verdict Stability
+
+| Verdict | Confirmation Required |
+|---------|----------------------|
+| OK | Single run sufficient |
+| WARN | Requires confirmation in two consecutive runs |
+| BLOCK | Requires persistent regression across two runs OR large delta (>2x threshold) in single run |
+
+### Anti-Flapping
+
+```python
+# Pseudo-code for verdict stability
+if current_verdict == WARN and previous_verdict == OK:
+    return WARN_PENDING  # Requires confirmation
+if current_verdict == BLOCK and delta < 2 * block_threshold:
+    return BLOCK_PENDING  # Requires confirmation run
+```
+
+This prevents release pipeline flapping from metric noise while maintaining sensitivity to real regressions.
+
+---
+
 ## Limitations
 
 - Uses simulated model responses by default (real API integration optional)

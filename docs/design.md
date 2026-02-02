@@ -101,6 +101,38 @@ else:
 
 Thresholds are configurable via YAML to allow tuning for different use cases.
 
+## Threshold Governance
+
+Thresholds are critical policy decisions, not arbitrary numbers.
+
+### Calibration Process
+
+1. **Initial thresholds** are calibrated from historical regression distributions
+2. **Validation** against known regressions to ensure sensitivity
+3. **Review** by safeguards owners before deployment
+
+### Change Control
+
+- All threshold changes require review from safeguards team
+- Changes are versioned in git with justification in commit message
+- Audit trail maintained for compliance
+
+### Anti-Gaming Protections
+
+- Thresholds cannot be modified by release requesters
+- Overrides require explicit sign-off from safety leadership
+- "Always pass" configurations are flagged and blocked
+
+```yaml
+# Example: Threshold change commit message
+# "Relax violation_rate warn threshold 0.03 -> 0.04
+#  Justification: Historical data shows 3% natural variance
+#  Approved by: Safety Lead
+#  Ticket: SAFE-1234"
+```
+
+---
+
 ## Design Tradeoffs
 
 | Decision | Choice | Rationale |
