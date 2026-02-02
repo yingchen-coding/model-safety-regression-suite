@@ -19,6 +19,9 @@ Safety can quietly degrade as models gain capability. A model that passes absolu
 - **HTML regression reports** with metric diffs and failure mode breakdowns
 - **Pluggable adapters** for different evaluation suites
 - **Conservative defaults** that bias toward catching regressions
+- **Statistical significance testing** with bootstrap CI and permutation tests
+- **Longitudinal trend tracking** to detect slow erosion across releases
+- **Traffic replay adapter** for shadow evaluation on production logs
 
 ---
 
@@ -210,21 +213,25 @@ def grade_risk(regressions: list[Regression]) -> Verdict:
 ```
 model-safety-regression-suite/
 ├── adapters/
+│   ├── base.py            # EvalAdapter protocol
 │   ├── misuse.py          # Wrap misuse benchmark
 │   ├── redteam.py         # Wrap stress tests
-│   └── trajectory.py      # Wrap trajectory eval
+│   ├── trajectory.py      # Wrap trajectory eval
+│   └── traffic.py         # Production traffic replay
 ├── core/
 │   ├── runner.py          # Orchestrate evaluations
-│   ├── diff.py            # Compute metric deltas
-│   └── risk.py            # Risk grading logic
+│   ├── diff.py            # Compute metric deltas + root cause
+│   ├── risk.py            # Risk grading logic
+│   ├── stats.py           # Statistical significance testing
+│   └── history.py         # Longitudinal trend tracking
 ├── reports/
 │   └── html.py            # HTML report generator
 ├── configs/
 │   └── thresholds.yaml    # Regression thresholds
-├── examples/
-│   └── sample_report.html # Example output
+├── data/
+│   └── .gitkeep           # Traffic data storage
 ├── docs/
-│   └── design.md          # Release gating philosophy
+│   └── design.md          # Release gating philosophy + governance
 ├── run_regression.py      # CLI entry point
 └── requirements.txt
 ```
@@ -241,6 +248,139 @@ This suite mirrors how safety regression can be integrated into model release pi
 4. **Conservative defaults**: Err on the side of caution
 
 The goal is not just to evaluate safety, but to **prevent safety regressions from reaching production**.
+
+---
+
+## Statistical Significance
+
+Regressions must be statistically significant to trigger BLOCK decisions.
+
+### Bootstrap Confidence Intervals
+
+```python
+from core import StatisticalAnalyzer
+
+analyzer = StatisticalAnalyzer(confidence_level=0.95, n_bootstrap=10000)
+result = analyzer.analyze(baseline_samples, candidate_samples)
+
+print(f"Delta: {result.delta:.4f}")
+print(f"95% CI: [{result.ci_lower:.4f}, {result.ci_upper:.4f}]")
+print(f"p-value: {result.p_value:.4f}")
+print(f"Significant: {result.is_significant}")
+```
+
+### Significance-Aware Gating
+
+```python
+from core import gate_with_significance
+
+# BLOCK only if CI lower bound exceeds threshold
+verdict = gate_with_significance(
+    stat_result,
+    threshold=0.05,
+    higher_is_worse=True
+)
+```
+
+**Philosophy**: Point estimates can deceive. We require statistical confidence before blocking releases.
+
+---
+
+## Longitudinal Trend Tracking
+
+Detect slow erosion that pairwise comparisons miss.
+
+### Track Safety Over Releases
+
+```python
+from core import HistoryStore, TrendAnalyzer
+
+# Store historical results
+store = HistoryStore('data/history.json')
+store.add_run(HistoricalRun(
+    run_id='run_001',
+    timestamp='2024-01-15T10:00:00',
+    model_version='v1.2.3',
+    metrics={'violation_rate': 0.082},
+    verdict='OK'
+))
+
+# Analyze trends
+analyzer = TrendAnalyzer(erosion_threshold=0.01)
+trends = analyzer.analyze_all(store, thresholds, higher_is_worse)
+
+for trend in trends:
+    if trend.is_eroding:
+        print(f"WARNING: {trend.metric} eroding at {trend.slope:.4f}/release")
+        if trend.projected_threshold_breach:
+            print(f"  Breach projected in {trend.projected_threshold_breach} releases")
+```
+
+### Trend Report Output
+
+```
+| Metric | Slope | R² | Eroding | Breach In |
+|--------|-------|----|---------|-----------|
+| violation_rate | 0.0082 | 0.91 | ⚠️ | 7 |
+| delayed_failure | 0.0041 | 0.78 | ⚠️ | 12 |
+```
+
+---
+
+## Traffic Replay Adapter
+
+Test against real (anonymized) production traffic, not just synthetic benchmarks.
+
+### Setup
+
+```python
+from adapters import TrafficAdapter, create_sample_traffic_file
+
+# Create sample traffic for testing
+create_sample_traffic_file('data/traffic.json', n_samples=1000)
+
+# Run traffic-based regression
+adapter = TrafficAdapter(
+    traffic_path='data/traffic.json',
+    sample_limit=500
+)
+result = adapter.run(baseline_id='v1.0', candidate_id='v1.1')
+
+print(f"Traffic regression rate: {result.metrics['traffic_regression_rate']:.2%}")
+```
+
+### Traffic Data Format
+
+```json
+[
+  {
+    "sample_id": "traffic_00001",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "turns": [
+      {"role": "user", "content": "User message..."},
+      {"role": "assistant", "content": "Response..."}
+    ],
+    "metadata": {"source": "production", "region": "us-west"}
+  }
+]
+```
+
+### Integration with Production Logs
+
+```bash
+# Export anonymized traffic from production
+python scripts/export_traffic.py \
+  --source production_logs \
+  --output data/traffic.jsonl \
+  --anonymize \
+  --sample-rate 0.01
+
+# Run regression against real traffic
+python run_regression.py \
+  --baseline v1.0 \
+  --candidate v1.1 \
+  --suite traffic
+```
 
 ---
 
