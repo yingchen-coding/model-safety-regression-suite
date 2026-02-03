@@ -1,23 +1,24 @@
-# Model Safety Constitution v1.0
+# Model Safety Constitution v2.0
 #
 # This is the EXECUTABLE constitution for the safety system.
 # All release verdicts, safeguard configurations, and risk assessments
 # trace back to these principles.
 #
 # Philosophy:
-# - Principles are hierarchical (higher priority overrides lower)
-# - Each principle maps to measurable criteria
-# - Violations are graded, not binary
-# - Constitution versioning enables auditability
+# - Constitution is the first-class object, not metrics
+# - Principles define what "safe" means; metrics measure adherence
+# - Violations are structured and auditable
+# - Every gate verdict traces to specific principles
 #
 # Usage:
 # - Every gate verdict references this constitution hash
 # - Safeguards map to specific principles they uphold
 # - Deviations require explicit justification and ownership
+# - Alignment debt accumulates when principles are temporarily violated
 
-version: "1.0.0"
-effective_date: "2026-01-01"
-constitution_hash: "sha256:placeholder_computed_at_runtime"
+version: "2026.02"
+effective_date: "2026-02-01"
+constitution_hash: "auto-generated-at-build"  # Computed from content
 
 # =============================================================================
 # CORE PRINCIPLES (Hierarchical Priority)
