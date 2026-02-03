@@ -27,6 +27,17 @@ exceptions:
       role: Head_of_Safety
       email: "yingchen.for.upload@gmail.com"
 
+    # Blast radius constraints (cross-repo forbidden)
+    repo_scope: model-safety-regression-suite
+
+    # Explicit safeguard and principle scope (entropy limited)
+    safeguard_scope:
+      safeguards:
+        - mid_trajectory.policy_erosion_detector
+        - trajectory_monitor.intent_drift_guard
+      constitution_principles:
+        - C2
+
     scope:
       type: alignment_error_budget
       target: quarterly_budget
@@ -47,6 +58,9 @@ exceptions:
     ttl_days: 7
     expires_at: "2026-02-08T12:00:00Z"
 
+    renewal_count: 0
+    max_renewals: 2
+
     renewals:
       count: 0
       max_allowed: 2
@@ -54,6 +68,14 @@ exceptions:
 
     linked_debts:
       - AD-2026-02-C2
+
+    # Auto-triggered incident review
+    incident_review:
+      required: true
+      meeting_id: IR-2026-02-EX-001
+      owner: Safety_Oncall
+      scheduled_for: "2026-02-03T18:00:00Z"
+      status: scheduled
 
     audit_trail:
       ticket: "SAFETY-EXC-412"

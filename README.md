@@ -36,6 +36,23 @@ See [`config/exception_authority.yaml`](config/exception_authority.yaml) for ful
 
 ---
 
+## 💥 Exception Blast Radius Limiter
+
+Safety exceptions are constrained by blast radius to prevent governance abuse:
+
+**Hard constraints:**
+- Exceptions must specify **exact safeguards and Constitution principles**
+- **Cross-repo exceptions are forbidden** (repo_scope must match)
+- **Renewal limit: 2 consecutive** (prevents indefinite extension)
+- **Every exception triggers an Incident Review** (accountability)
+- **Entropy budget:** Max 5 safeguards + 3 principles per exception
+
+**Why this exists:** Without blast radius limits, a single exception could disable half the safety system. This prevents "blanket override" governance failures.
+
+See [`scripts/check_exception_blast_radius.py`](scripts/check_exception_blast_radius.py) for enforcement.
+
+---
+
 ## Realistic Failure This Repo Prevents
 
 **The 2023-2024 Pattern**: Teams relied on static red-teaming before releases. Models passed single-turn safety benchmarks but exhibited:
