@@ -2,7 +2,23 @@
 
 # Model Safety Regression Suite
 
-> A unified regression benchmark suite to detect safety degradations across model versions using multi-turn misuse evals, red-teaming stress tests, and trajectory-level safeguards metrics.
+> **Aggregate multi-suite safety metrics into a single release verdict: OK / WARN / BLOCK.**
+
+A unified regression benchmark suite to detect safety degradations across model versions using multi-turn misuse evals, red-teaming stress tests, and trajectory-level safeguards metrics.
+
+**Boundary clarification:**
+- [scalable-safeguards-eval-pipeline](https://github.com/yingchen-coding/scalable-safeguards-eval-pipeline): "What is happening?" (observation)
+- **This repo**: "Can we ship this change safely?" (judgment)
+
+**This repo does NOT:**
+- ❌ Run large-scale distributed evaluation (eval-pipeline's job)
+- ❌ Generate attacks or benchmarks (stress-tests/misuse-benchmark's job)
+- ❌ Implement safeguards (simulator's job)
+- ❌ Analyze failure mechanisms (when-rlhf-fails' job)
+
+**Single responsibility**: Compare baseline vs candidate → Verdict
+
+---
 
 ## Why Safety Regression Matters
 
@@ -165,6 +181,41 @@ The suite generates a comprehensive regression report:
 
 ---
 
+## Baseline Selection Strategy
+
+Prevents "baseline corruption" where a degraded baseline allows further degradation to pass.
+
+```yaml
+# config/baseline_strategy.yaml
+baseline:
+  mode: "last_release"  # pinned | last_release | rolling_best
+  pinned:
+    model_version: "gpt-4.2-2026-01-15"
+    reason: "Long-term safety standard"
+```
+
+| Mode | Purpose |
+|------|---------|
+| `pinned` | Align with long-term safety standard (prevent standard drift) |
+| `last_release` | Prevent regression from previous version |
+| `rolling_best` | Encourage continuous improvement (monotonic safety) |
+
+**Multi-baseline comparison** (recommended):
+
+```json
+{
+  "vs_last_release": { "violation_rate_delta": "+2.1%" },
+  "vs_pinned_baseline": { "violation_rate_delta": "+6.4%" },
+  "vs_rolling_best": { "violation_rate_delta": "+8.2%" }
+}
+```
+
+This answers: "Are we regressing vs last release? Are we still meeting our long-term standard?"
+
+See [`config/baseline_strategy.yaml`](config/baseline_strategy.yaml) for full configuration.
+
+---
+
 ## Threshold Configuration
 
 ```yaml
@@ -223,11 +274,14 @@ model-safety-regression-suite/
 │   ├── diff.py            # Compute metric deltas + root cause
 │   ├── risk.py            # Risk grading logic
 │   ├── stats.py           # Statistical significance testing
-│   └── history.py         # Longitudinal trend tracking
+│   ├── history.py         # Longitudinal trend tracking (core)
+│   └── business_risk.py   # Business risk override logic
+├── config/
+│   ├── thresholds.yaml    # Regression thresholds
+│   ├── baseline_strategy.yaml  # Baseline selection modes
+│   └── policy_exception.yaml   # Controlled overrides
 ├── reports/
 │   └── html.py            # HTML report generator
-├── configs/
-│   └── thresholds.yaml    # Regression thresholds
 ├── data/
 │   └── .gitkeep           # Traffic data storage
 ├── docs/
@@ -286,7 +340,100 @@ verdict = gate_with_significance(
 
 ---
 
-## Longitudinal Trend Tracking
+## Business Risk Override
+
+Not all significant regressions matter equally. Not all regressions that matter are significant.
+
+**Decision matrix:**
+
+```
+┌─────────────────┬─────────────────┬─────────────────┐
+│                 │ Significant     │ Not Significant │
+├─────────────────┼─────────────────┼─────────────────┤
+│ High Risk Cat   │ BLOCK           │ WARN + Review   │
+│ Low Risk Cat    │ WARN/BLOCK      │ OK              │
+└─────────────────┴─────────────────┴─────────────────┘
+```
+
+**Example:**
+
+```json
+{
+  "metric": "coordinated_misuse_failure_rate",
+  "delta": "+2.1%",
+  "ci": [-0.3%, +4.5%],
+  "p_value": 0.089,
+  "statistical_significant": false,
+  "business_risk": "CRITICAL",
+  "verdict": "WARN",
+  "note": "Not statistically significant, but impacts critical-risk category",
+  "requires_human_review": true
+}
+```
+
+This prevents both:
+- **False confidence**: Blocking on noise
+- **False safety**: Missing high-risk regressions that aren't yet significant
+
+See [`core/business_risk.py`](core/business_risk.py) for implementation.
+
+---
+
+## Policy Exception Mechanism
+
+Real release pipelines need controlled overrides.
+
+```yaml
+# config/policy_exception.yaml
+exceptions:
+  - id: "EXC-2026-001"
+    expires: "2026-02-28"
+    override:
+      metric: "delayed_failure_rate"
+      original_threshold: 0.10
+      candidate_value: 0.12
+    justification: "Critical product launch; mitigation in place"
+    approvals:
+      - role: "Safety Lead"
+        name: "Jane Smith"
+    conditions:
+      - "Monitor in production for 7 days"
+      - "Rollback if exceeds 15%"
+```
+
+**Report output with exception:**
+
+```
+⚠️ This release is BLOCKED by policy, but overridden by exception.
+   Exception ID: EXC-2026-001
+   Expires: 2026-02-28
+   Approved by: Safety Lead (Jane Smith)
+```
+
+See [`config/policy_exception.yaml`](config/policy_exception.yaml) for configuration.
+
+---
+
+## Longitudinal Trend Tracking (Core Capability)
+
+**Pairwise comparisons miss slow decay. Longitudinal tracking catches it.**
+
+This is the hidden killer: each release passes vs the previous one, but over 5 releases, safety has quietly degraded:
+
+```
+Release v38: OK   (vs v37)
+Release v39: OK   (vs v38)
+Release v40: OK   (vs v39)
+Release v41: WARN (vs v40)
+Release v42: BLOCK (vs v41)
+
+history.py shows: monotonic erosion over 5 releases
+  violation_rate: 6% → 7% → 8% → 9% → 12%
+```
+
+**Connection to [when-rlhf-fails-quietly](https://github.com/yingchen-coding/when-rlhf-fails-quietly):**
+- That repo explains *why* safety fails quietly
+- This repo *prevents* quiet failure through longitudinal tracking
 
 Detect slow erosion that pairwise comparisons miss.
 
@@ -416,12 +563,53 @@ This prevents release pipeline flapping from metric noise while maintaining sens
 
 ---
 
+## Design Philosophy
+
+1. **Release gating is a safety control, not a research metric**
+   The goal is preventing unsafe releases, not measuring safety precisely.
+
+2. **Conservative bias is intentional**
+   Blocking safe releases is cheaper than shipping unsafe ones.
+
+3. **Statistical rigor prevents noisy gating, but business risk can override significance**
+   High-risk categories get lower thresholds and force human review.
+
+4. **Traffic replay bridges the synthetic-to-real gap**
+   Benchmarks can be gamed; production traffic cannot.
+
+5. **Longitudinal tracking guards against slow erosion**
+   Pairwise comparisons miss death by a thousand cuts.
+
+6. **Policy exceptions are first-class citizens**
+   Real release pipelines need controlled overrides with audit trails.
+
+---
+
 ## Limitations
 
 - Uses simulated model responses by default (real API integration optional)
 - Thresholds require calibration for specific use cases
 - Human review still recommended for BLOCK decisions
 - Synthetic scenarios may not capture all real-world failure modes
+
+---
+
+## Interface with Eval Pipeline
+
+Clear boundary between observation (⑤) and judgment (⑥):
+
+| Repo | Question Answered |
+|------|-------------------|
+| ⑤ scalable-safeguards-eval-pipeline | "What is happening in production?" |
+| **⑥ This repo** | "Can we ship this change safely?" |
+
+**Input from ⑤:**
+- `metrics.parquet` — Raw evaluation metrics
+- `erosion_curves.parquet` — Trajectory-level degradation
+
+**Output from ⑥:**
+- `verdict.json` — OK / WARN / BLOCK with reasons
+- `regression_report.html` — Detailed analysis
 
 ---
 
@@ -432,11 +620,31 @@ This prevents release pipeline flapping from metric noise while maintaining sens
 | when-rlhf-fails-quietly | Understanding failure mechanisms |
 | agentic-misuse-benchmark | Misuse detection scenarios |
 | safeguards-stress-tests | Red-team attack templates |
-| scalable-safeguards-eval-pipeline | Trajectory-level evaluation |
-| **This project** | Unified regression & release gating |
+| scalable-safeguards-eval-pipeline | Observation & metrics (⑤) |
+| **This project** | Judgment & release gating (⑥) |
+| agentic-safety-incident-lab | Post-incident learning (⑦) |
+
+---
+
+## Citation
+
+```bibtex
+@misc{chen2026regression,
+  title  = {Model Safety Regression Suite: Release Gating for Safety-Critical AI Systems},
+  author = {Chen, Ying},
+  year   = {2026}
+}
+```
+
+---
+
+## Contact
+
+Ying Chen, Ph.D.
+yingchen.for.upload@gmail.com
 
 ---
 
 ## License
 
-MIT
+CC BY-NC 4.0

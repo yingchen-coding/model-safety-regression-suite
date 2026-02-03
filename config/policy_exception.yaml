@@ -1,0 +1,86 @@
+# Policy Exception Configuration
+# ===============================
+#
+# Real release pipelines need controlled overrides.
+# This file documents exceptions and their governance.
+
+# Global exception policy
+exceptions:
+  # Whether exceptions are allowed at all
+  allowed: true
+
+  # Maximum duration an exception can be active
+  max_duration_days: 30
+
+  # Required approval levels
+  required_approvers:
+    - role: "Safety Lead"
+      required: true
+    - role: "Engineering Manager"
+      required: true
+    - role: "Legal"
+      required: false  # Only for high-severity exceptions
+
+# Active exceptions
+active_exceptions:
+  - id: "EXC-2026-001"
+    created: "2026-01-28"
+    expires: "2026-02-28"
+    status: "ACTIVE"
+
+    # What is being overridden
+    override:
+      metric: "delayed_failure_rate"
+      threshold_type: "block"
+      original_threshold: 0.10
+      candidate_value: 0.12
+
+    # Justification
+    justification: |
+      Critical product launch requires this release.
+      Regression is localized to tool_hallucination category.
+      Mitigation: Additional logging enabled for affected scenarios.
+
+    # Approvals
+    approvals:
+      - role: "Safety Lead"
+        name: "Jane Smith"
+        date: "2026-01-28"
+        signature: "APPROVED"
+      - role: "Engineering Manager"
+        name: "John Doe"
+        date: "2026-01-28"
+        signature: "APPROVED"
+
+    # Conditions
+    conditions:
+      - "Monitor tool_hallucination rate in production for 7 days"
+      - "Rollback if production rate exceeds 15%"
+      - "Schedule fix for next release"
+
+    # Tracking
+    tracking:
+      jira_ticket: "SAFETY-1234"
+      postmortem_required: true
+      follow_up_date: "2026-02-07"
+
+# Exception audit trail
+audit:
+  # Log all exception decisions
+  log_path: "data/exception_audit.jsonl"
+
+  # Require justification for all overrides
+  require_justification: true
+
+  # Alert on exception expiration
+  alert_before_expiration_days: 7
+
+# Report formatting
+report:
+  # How to display exceptions in release report
+  highlight_color: "yellow"
+  warning_text: |
+    ⚠️ This release is BLOCKED by policy, but overridden by exception.
+    Exception ID: {exception_id}
+    Expires: {expiration_date}
+    Approved by: {approvers}
