@@ -1,0 +1,67 @@
+# Safeguard ROI Catalog
+#
+# Each safeguard's expected risk reduction per $100k investment.
+# Used by the portfolio optimizer to recommend optimal allocation.
+#
+# Parameters:
+#   base_risk_reduction_per_100k_pct: Expected risk reduction per $100k
+#   maturity: low/medium/high - implementation maturity
+#   blast_radius: low/medium/high - breadth of coverage
+#   principle_coverage: Constitution principles this safeguard upholds
+
+safeguards:
+  pre_action.prompt_injection_guard:
+    base_risk_reduction_per_100k_pct: 12
+    maturity: medium
+    blast_radius: high
+    principle_coverage: [C1, C3]
+    description: "Blocks prompt injection before action execution"
+
+  trajectory_monitor.intent_drift_guard:
+    base_risk_reduction_per_100k_pct: 9
+    maturity: high
+    blast_radius: high
+    principle_coverage: [C2, C3]
+    description: "Detects stated vs actual intent divergence over turns"
+
+  post_action.schema_validator:
+    base_risk_reduction_per_100k_pct: 7
+    maturity: low
+    blast_radius: medium
+    principle_coverage: [C6]
+    description: "Validates API outputs against expected schema"
+
+  tool_sandbox.isolation_layer:
+    base_risk_reduction_per_100k_pct: 6
+    maturity: medium
+    blast_radius: medium
+    principle_coverage: [C1, C4]
+    description: "Isolates tool execution in sandboxed environment"
+
+  policy_conflict_detector:
+    base_risk_reduction_per_100k_pct: 5
+    maturity: low
+    blast_radius: low
+    principle_coverage: [C2, C5]
+    description: "Detects conflicting policy instructions"
+
+  capability_accumulation_monitor:
+    base_risk_reduction_per_100k_pct: 8
+    maturity: low
+    blast_radius: high
+    principle_coverage: [C1, C3]
+    description: "Tracks capability synthesis across multi-tool trajectories"
+
+  human_escalation_gate:
+    base_risk_reduction_per_100k_pct: 4
+    maturity: high
+    blast_radius: medium
+    principle_coverage: [C3, C4]
+    description: "Mandatory human review for high-stakes actions"
+
+# Governance metadata
+metadata:
+  last_calibration: "2026-01-15"
+  calibration_method: historical_incident_regression
+  owner: Head_of_Safety
+  review_cadence: quarterly

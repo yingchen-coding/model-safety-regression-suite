@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-02-03T08:25:57.489855+00:00",
+  "budget_usd": 500000,
+  "unit_size_usd": 100000,
+  "units_allocated": 5,
+  "top_n": 3,
+  "portfolio": [
+    {
+      "safeguard": "pre_action.prompt_injection_guard",
+      "allocated_usd": 200000,
+      "allocated_units": 2,
+      "expected_risk_reduction_pct": 38.63,
+      "base_roi_per_100k": 12,
+      "blast_radius": "high",
+      "maturity": "medium",
+      "principle_coverage": [
+        "C1",
+        "C3"
+      ],
+      "description": "Blocks prompt injection before action execution"
+    },
+    {
+      "safeguard": "trajectory_monitor.intent_drift_guard",
+      "allocated_usd": 100000,
+      "allocated_units": 1,
+      "expected_risk_reduction_pct": 27.63,
+      "base_roi_per_100k": 9,
+      "blast_radius": "high",
+      "maturity": "high",
+      "principle_coverage": [
+        "C2",
+        "C3"
+      ],
+      "description": "Detects stated vs actual intent divergence over turns"
+    },
+    {
+      "safeguard": "capability_accumulation_monitor",
+      "allocated_usd": 200000,
+      "allocated_units": 2,
+      "expected_risk_reduction_pct": 34.0,
+      "base_roi_per_100k": 8,
+      "blast_radius": "high",
+      "maturity": "low",
+      "principle_coverage": [
+        "C1",
+        "C3"
+      ],
+      "description": "Tracks capability synthesis across multi-tool trajectories"
+    }
+  ],
+  "total_expected_risk_reduction_pct": 60.0,
+  "runner_ups": [
+    {
+      "safeguard": "post_action.schema_validator",
+      "score": 6.3
+    },
+    {
+      "safeguard": "tool_sandbox.isolation_layer",
+      "score": 6.0
+    },
+    {
+      "safeguard": "human_escalation_gate",
+      "score": 4.4
+    }
+  ]
+}

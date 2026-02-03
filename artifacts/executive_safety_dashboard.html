@@ -141,6 +141,103 @@
             color: #6c757d;
             font-size: 12px;
         }
+        .portfolio-card {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .portfolio-rank {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffc107;
+            margin-right: 15px;
+            min-width: 40px;
+        }
+        .portfolio-details {
+            flex: 1;
+        }
+        .portfolio-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .portfolio-meta {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .portfolio-tags {
+            margin-top: 8px;
+        }
+        .tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-right: 5px;
+        }
+        .curve-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .curve-point {
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            min-width: 80px;
+        }
+        .curve-investment {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .curve-reduction {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .heatmap-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 12px;
+            border-radius: 6px;
+        }
+        .heatmap-vector {
+            font-size: 13px;
+        }
+        .heatmap-level {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+        }
+        .portfolio-summary {
+            background: linear-gradient(135deg, rgba(40,167,69,0.2), rgba(255,193,7,0.2));
+            border: 2px solid #28a745;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .portfolio-summary .headline {
+            font-size: 18px;
+            font-weight: bold;
+        }
         @media print {
             body { background: white; color: black; }
             .metric-card, .section { border: 1px solid #ddd; }
@@ -152,7 +249,7 @@
         <div class="header">
             <h1>🏛️ Executive Safety Dashboard</h1>
             <div class="meta">
-                Release: <strong>v2.3.1-candidate</strong> | Generated: 2026-02-03T08:21:25.406918+00:00 | Classification: Internal - Board Level
+                Release: <strong>v2.3.1-candidate</strong> | Generated: 2026-02-03T08:26:13.475961+00:00 | Classification: Internal - Board Level
             </div>
         </div>
 
@@ -266,6 +363,146 @@
         
                 </tbody>
             </table>
+        </div>
+
+        <div class="section-grid">
+            <div class="section">
+                <h3>🎯 Recommended Portfolio (Top-3 Safeguards)</h3>
+                
+        <div class="portfolio-card">
+            <div class="portfolio-rank">#1</div>
+            <div class="portfolio-details">
+                <div class="portfolio-name">pre_action.prompt_injection_guard</div>
+                <div class="portfolio-meta">
+                    $200,000 → <strong>-38.63%</strong> risk
+                </div>
+                <div class="portfolio-tags">
+                    <span class="tag">high blast</span>
+                    <span class="tag">medium maturity</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="portfolio-card">
+            <div class="portfolio-rank">#2</div>
+            <div class="portfolio-details">
+                <div class="portfolio-name">trajectory_monitor.intent_drift_guard</div>
+                <div class="portfolio-meta">
+                    $100,000 → <strong>-27.63%</strong> risk
+                </div>
+                <div class="portfolio-tags">
+                    <span class="tag">high blast</span>
+                    <span class="tag">high maturity</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="portfolio-card">
+            <div class="portfolio-rank">#3</div>
+            <div class="portfolio-details">
+                <div class="portfolio-name">capability_accumulation_monitor</div>
+                <div class="portfolio-meta">
+                    $200,000 → <strong>-34.0%</strong> risk
+                </div>
+                <div class="portfolio-tags">
+                    <span class="tag">high blast</span>
+                    <span class="tag">low maturity</span>
+                </div>
+            </div>
+        </div>
+        
+                <div class="portfolio-summary">
+                    <div class="headline">
+                        $500,000 investment → -60.0% total risk reduction
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h3>🔥 Risk Heatmap (Current Quarter)</h3>
+                <div class="heatmap-grid">
+                    
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Prompt Injection</span>
+            <span class="heatmap-level" style="background: #ffc107;">MEDIUM</span>
+        </div>
+        
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Tool Misuse</span>
+            <span class="heatmap-level" style="background: #dc3545;">CRITICAL</span>
+        </div>
+        
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Policy Erosion</span>
+            <span class="heatmap-level" style="background: #fd7e14;">HIGH</span>
+        </div>
+        
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Coordination Attack</span>
+            <span class="heatmap-level" style="background: #dc3545;">CRITICAL</span>
+        </div>
+        
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Schema Hallucination</span>
+            <span class="heatmap-level" style="background: #28a745;">LOW</span>
+        </div>
+        
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Capability Accumulation</span>
+            <span class="heatmap-level" style="background: #dc3545;">CRITICAL</span>
+        </div>
+        
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Intent Drift</span>
+            <span class="heatmap-level" style="background: #fd7e14;">HIGH</span>
+        </div>
+        
+        <div class="heatmap-item">
+            <span class="heatmap-vector">Escalation Bypass</span>
+            <span class="heatmap-level" style="background: #28a745;">LOW</span>
+        </div>
+        
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📈 Safety ROI Curve (Diminishing Returns)</h3>
+            <div class="curve-container">
+                
+        <div class="curve-point">
+            <div class="curve-investment">$50,000</div>
+            <div class="curve-reduction">-6.1%</div>
+        </div>
+        
+        <div class="curve-point">
+            <div class="curve-investment">$100,000</div>
+            <div class="curve-reduction">-10.4%</div>
+        </div>
+        
+        <div class="curve-point">
+            <div class="curve-investment">$200,000</div>
+            <div class="curve-reduction">-16.5%</div>
+        </div>
+        
+        <div class="curve-point">
+            <div class="curve-investment">$300,000</div>
+            <div class="curve-reduction">-20.8%</div>
+        </div>
+        
+        <div class="curve-point">
+            <div class="curve-investment">$500,000</div>
+            <div class="curve-reduction">-26.9%</div>
+        </div>
+        
+        <div class="curve-point">
+            <div class="curve-investment">$800,000</div>
+            <div class="curve-reduction">-33.0%</div>
+        </div>
+        
+            </div>
+            <p style="margin-top: 15px; font-size: 13px; color: #94a3b8; text-align: center;">
+                Investment shows diminishing returns beyond $500k. Optimal allocation follows portfolio recommendation above.
+            </p>
         </div>
 
         <div class="footer">

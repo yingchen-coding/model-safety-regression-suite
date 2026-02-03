@@ -1,0 +1,42 @@
+[
+  {
+    "investment_usd": 50000,
+    "risk_reduction_pct": 6.1,
+    "marginal_roi": 12.2
+  },
+  {
+    "investment_usd": 100000,
+    "risk_reduction_pct": 10.4,
+    "marginal_roi": 10.4
+  },
+  {
+    "investment_usd": 200000,
+    "risk_reduction_pct": 16.5,
+    "marginal_roi": 8.25
+  },
+  {
+    "investment_usd": 300000,
+    "risk_reduction_pct": 20.8,
+    "marginal_roi": 6.93
+  },
+  {
+    "investment_usd": 500000,
+    "risk_reduction_pct": 26.9,
+    "marginal_roi": 5.38
+  },
+  {
+    "investment_usd": 800000,
+    "risk_reduction_pct": 33.0,
+    "marginal_roi": 4.12
+  },
+  {
+    "investment_usd": 1000000,
+    "risk_reduction_pct": 36.0,
+    "marginal_roi": 3.6
+  },
+  {
+    "investment_usd": 1500000,
+    "risk_reduction_pct": 41.6,
+    "marginal_roi": 2.77
+  }
+]
