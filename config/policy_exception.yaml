@@ -3,9 +3,50 @@
 #
 # Real release pipelines need controlled overrides.
 # This file documents exceptions and their governance.
+#
+# Integration:
+# - settle_alignment_debt.py removes exceptions when mitigations are verified
+# - debt_aging.py checks exception expiration
+# - generate_constitution_audit.py reads this for gate decisions
+
+version: "2026.02"
+last_updated: "2026-02-02T14:00:00Z"
+
+# Principle-based exceptions (consumed by settle_alignment_debt.py)
+# These are automatically cleared when incidents are resolved
+exceptions:
+  - exception_id: EXC-PRINCIPLE-001
+    principle: C2
+    mechanism: policy_erosion
+    allowed_until: "2026-03-15"
+    rationale: >
+      Temporary exception pending fix for policy erosion in long-horizon
+      multi-tool trajectories. Detector threshold lowered to 0.70 pending
+      retraining with expanded dataset.
+    owner: "yingchen.for.upload@gmail.com"
+    approved_by: "Safety Council"
+    conditions:
+      - "Daily monitoring of flagged conversations"
+      - "Weekly false positive review"
+      - "Immediate escalation if policy erosion incident occurs"
+    debt_id: "AD-2026-02"
+
+  - exception_id: EXC-PRINCIPLE-002
+    principle: C4
+    mechanism: statistical_power_override
+    allowed_until: "2026-02-28"
+    rationale: >
+      Power was 0.72 (below 0.80 threshold) for coordinated misuse scenarios.
+      Exception allows release while additional evaluation data is collected.
+    owner: "yingchen.for.upload@gmail.com"
+    approved_by: "Evaluation Infrastructure"
+    conditions:
+      - "Power analysis rerun weekly"
+      - "Block if power drops below 0.65"
+    debt_id: "AD-2026-01"
 
 # Global exception policy
-exceptions:
+policy:
   # Whether exceptions are allowed at all
   allowed: true
 
@@ -21,7 +62,7 @@ exceptions:
     - role: "Legal"
       required: false  # Only for high-severity exceptions
 
-# Active exceptions
+# Active metric-based exceptions (original format)
 active_exceptions:
   - id: "EXC-2026-001"
     created: "2026-01-28"
@@ -84,3 +125,15 @@ report:
     Exception ID: {exception_id}
     Expires: {expiration_date}
     Approved by: {approvers}
+
+# Audit log (updated by settle_alignment_debt.py)
+audit_log:
+  - action: exception_created
+    exception_id: EXC-PRINCIPLE-001
+    timestamp: "2026-02-02T15:00:00Z"
+    created_by: "Safety Engineering"
+
+  - action: exception_created
+    exception_id: EXC-PRINCIPLE-002
+    timestamp: "2026-01-20T00:00:00Z"
+    created_by: "Evaluation Infrastructure"
