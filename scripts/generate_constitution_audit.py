@@ -30,7 +30,7 @@ import json
 import yaml
 import argparse
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from hashlib import sha256
 from typing import Optional
 
@@ -246,11 +246,11 @@ def generate_alignment_debt(
     Returns list of debt entries created.
     """
     debts = []
-    timestamp = datetime.utcnow().isoformat() + "Z"
+    timestamp = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
 
     for v in violations:
         if v.get("severity", "").lower() in ("high", "critical"):
-            debt_id = f"AD-{datetime.utcnow().strftime('%Y%m%d')}-{v['principle']}"
+            debt_id = f"AD-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{v['principle']}"
 
             debt = {
                 "debt_id": debt_id,

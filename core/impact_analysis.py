@@ -9,7 +9,7 @@ Philosophy: Don't just run tests; predict how changes will shift risk.
 from dataclasses import dataclass, field
 from typing import Dict, List, Set, Optional, Tuple
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class RiskDirection(Enum):
@@ -58,7 +58,7 @@ class ImpactAnalysisResult:
     required_additional_tests: List[str]
     recommended_focus_areas: List[str]
     overall_risk_assessment: str
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> Dict:
         return {

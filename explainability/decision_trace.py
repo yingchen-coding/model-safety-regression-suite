@@ -13,7 +13,7 @@ Every OK/WARN/BLOCK decision must be explainable to:
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 
@@ -167,8 +167,8 @@ class DecisionTracer:
         }
 
         trace = DecisionTrace(
-            decision_id=f"GATE_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
-            timestamp=datetime.utcnow(),
+            decision_id=f"GATE_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}",
+            timestamp=datetime.now(timezone.utc),
             verdict=verdict,
             baseline_model=baseline_model,
             candidate_model=candidate_model,
