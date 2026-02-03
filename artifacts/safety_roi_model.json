@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-02-03T08:21:25.346768+00:00",
+  "model_version": "1.0",
+  "parameters": {
+    "base_incident_probability": 0.02,
+    "debt_probability_increment": 0.015,
+    "average_incident_cost": 500000,
+    "critical_incident_cost": 2000000,
+    "safety_fte_cost": 250000
+  },
+  "probability_analysis": {
+    "base_probability": 0.02,
+    "debt_contribution": 0.06749999999999999,
+    "exception_contribution": 0.005,
+    "total_probability": 0.0925,
+    "open_debts": 2,
+    "active_exceptions": 1
+  },
+  "cost_analysis": {
+    "expected_quarterly_cost": 46250.0,
+    "annualized_expected_cost": 185000.0,
+    "average_incident_cost": 500000,
+    "critical_debt_count": 0
+  },
+  "investment_analysis": {
+    "scenarios": [
+      {
+        "fte_added": 1,
+        "investment": 250000,
+        "probability_reduction": 0.03,
+        "new_probability": 0.0625,
+        "risk_reduction": 60000.0,
+        "net_benefit": -190000.0,
+        "roi_percent": -76.0
+      },
+      {
+        "fte_added": 2,
+        "investment": 500000,
+        "probability_reduction": 0.06,
+        "new_probability": 0.0325,
+        "risk_reduction": 120000.0,
+        "net_benefit": -380000.0,
+        "roi_percent": -76.0
+      },
+      {
+        "fte_added": 3,
+        "investment": 750000,
+        "probability_reduction": 0.0725,
+        "new_probability": 0.02,
+        "risk_reduction": 145000.0,
+        "net_benefit": -605000.0,
+        "roi_percent": -80.7
+      },
+      {
+        "fte_added": 5,
+        "investment": 1250000,
+        "probability_reduction": 0.0725,
+        "new_probability": 0.02,
+        "risk_reduction": 145000.0,
+        "net_benefit": -1105000.0,
+        "roi_percent": -88.4
+      }
+    ],
+    "optimal_investment": {
+      "fte_added": 1,
+      "investment": 250000,
+      "probability_reduction": 0.03,
+      "new_probability": 0.0625,
+      "risk_reduction": 60000.0,
+      "net_benefit": -190000.0,
+      "roi_percent": -76.0
+    },
+    "break_even_fte": null
+  },
+  "executive_summary": "Based on current alignment debt (2 open) and active exceptions (1),\nthe expected quarterly incident probability is 9.2%.\n\nExpected annual risk exposure: $185,000\n\nRecommended investment: 1 FTE ($250,000)\nExpected risk reduction: $60,000\nNet benefit: $-190,000\nROI: -76%",
+  "board_headline": "$250,000 safety investment = 3% risk reduction (ROI: -76%)"
+}
