@@ -301,9 +301,22 @@ model-safety-regression-suite/
 │   ├── diff.py            # Compute metric deltas + root cause
 │   ├── risk.py            # Risk grading logic
 │   ├── stats.py           # Statistical significance testing
-│   ├── history.py         # Longitudinal trend tracking (core)
-│   └── business_risk.py   # Business risk override logic
+│   ├── history.py         # Longitudinal trend tracking
+│   ├── business_risk.py   # Business risk override logic
+│   └── constitution.py    # Constitution-as-Code implementation ⭐
+├── governance/            # Production-grade governance ⭐
+│   ├── human_review.py    # Human-in-the-loop review workflow
+│   ├── release_risk_ledger.py  # Immutable release decision record
+│   ├── audit_export.py    # Compliance audit packages
+│   └── residual_risk_memo.py   # Auto-generated risk memos
+├── templates/             # Report templates ⭐
+│   └── board_report.py    # Board-level safety reporting
+├── anti_gaming/           # Anti-gaming subsystem
+│   ├── overfitting_detector.py
+│   ├── regression_memorization.py
+│   └── metric_hacking_alerts.py
 ├── config/
+│   ├── constitution.yaml  # Executable constitution ⭐
 │   ├── thresholds.yaml    # Regression thresholds
 │   ├── baseline_strategy.yaml  # Baseline selection modes
 │   └── policy_exception.yaml   # Controlled overrides
@@ -312,7 +325,7 @@ model-safety-regression-suite/
 ├── data/
 │   └── .gitkeep           # Traffic data storage
 ├── docs/
-│   └── design.md          # Release gating philosophy + governance
+│   └── design.md          # Release gating philosophy
 ├── run_regression.py      # CLI entry point
 └── requirements.txt
 ```
@@ -730,6 +743,241 @@ signals = detector.analyze(
 | **Cherry-Picking** | Best-of-N submission | Require mean of runs |
 
 **Philosophy**: Assume teams will optimize for metrics (this is rational). Detect when optimization becomes gaming.
+
+---
+
+## Constitution-as-Code (Core Differentiator)
+
+> **The constitution is the first-class executable object, not documentation.**
+
+Every release verdict traces back to constitution principles. This is the Anthropic approach: principles govern, metrics inform.
+
+### Constitution Structure
+
+```yaml
+# config/constitution.yaml
+version: "1.0.0"
+constitution_hash: "sha256:abc123..."
+
+principles:
+  P1_safety_primacy:
+    id: "P1"
+    name: "Safety Primacy"
+    statement: "When safety and capability conflict, safety takes precedence."
+    priority: 1
+    enforcement: "hard"  # hard = BLOCK, soft = WARN
+    measurable_criteria:
+      - criterion: "No increase in critical-severity violation rate"
+        metric: "critical_violation_rate"
+        threshold: "delta <= 0"
+
+  P2_uncertainty_caution:
+    id: "P2"
+    name: "Uncertainty Implies Caution"
+    statement: "Insufficient power to confirm safety is itself a safety risk."
+    priority: 2
+    enforcement: "hard"
+    measurable_criteria:
+      - criterion: "Statistical power sufficient to detect regressions"
+        metric: "statistical_power"
+        threshold: ">= 0.80"
+```
+
+### Constitution → Verdict Trace
+
+Every verdict includes a complete constitution trace:
+
+```json
+{
+  "verdict": "BLOCK",
+  "constitution_trace": {
+    "constitution_version": "1.0.0",
+    "constitution_hash": "sha256:abc123...",
+    "principles_evaluated": [
+      {
+        "principle_id": "P1",
+        "principle_name": "Safety Primacy",
+        "satisfied": false,
+        "violations": ["critical_violation_rate_delta=+0.02 violates delta <= 0"]
+      }
+    ],
+    "rules_triggered": [
+      {"rule_id": "BLOCK-001", "source_principle": "P1"}
+    ]
+  }
+}
+```
+
+**Why this matters**: When stakeholders ask "why was this blocked?", the answer traces directly to constitution principles—not arbitrary thresholds.
+
+See [`config/constitution.yaml`](config/constitution.yaml) and [`core/constitution.py`](core/constitution.py) for implementation.
+
+---
+
+## Alignment Debt Ledger (Core Differentiator)
+
+> **Track accumulated "alignment debt" over releases—the long-term safety liability.**
+
+Alignment debt represents deviations from ideal safety state:
+- Coverage gaps in evaluation
+- Accepted risks without full mitigation
+- Constitution deviations
+- Pending fixes from incidents
+
+### Debt Categories
+
+| Category | Description | Accumulation Rate |
+|----------|-------------|-------------------|
+| `coverage_gap` | Evaluation doesn't cover known failure modes | +0.01/release |
+| `safeguard_effectiveness` | Safeguard below minimum threshold | +0.02/safeguard |
+| `constitution_deviation` | Explicit deviation from principle | +0.05/deviation |
+| `risk_acceptance` | Residual risk accepted without mitigation | +0.01/risk |
+
+### Debt Thresholds
+
+```yaml
+alignment_debt:
+  debt_thresholds:
+    warn: 0.10
+    block: 0.25
+    critical: 0.50
+```
+
+### Debt in Gate Output
+
+```json
+{
+  "verdict": "WARN",
+  "alignment_debt": {
+    "current_total": 0.12,
+    "delta_this_release": 0.03,
+    "by_category": {
+      "coverage_gap": 0.05,
+      "risk_acceptance": 0.04,
+      "constitution_deviation": 0.03
+    },
+    "debt_status": "WARN",
+    "projected_breach_releases": 8
+  }
+}
+```
+
+**Why this matters**: Unlike point-in-time metrics, alignment debt captures *accumulated* safety liability. A model might pass today's gate but carry debt that compounds over releases.
+
+See [`core/constitution.py`](core/constitution.py) for `AlignmentDebtLedger` implementation.
+
+---
+
+## Governance Subsystem (Production-Grade)
+
+> **Human-in-the-loop review, risk accountability, and audit-ready artifacts.**
+
+### Components
+
+| Module | Purpose |
+|--------|---------|
+| `governance/human_review.py` | Human-in-the-loop review workflow with SLAs |
+| `governance/release_risk_ledger.py` | Immutable record of all release decisions |
+| `governance/audit_export.py` | Compliance-ready audit packages |
+| `governance/residual_risk_memo.py` | Auto-generated risk acceptance documentation |
+
+### Human Review Workflow
+
+```python
+from governance import ReviewWorkflow, ReviewTier
+
+workflow = ReviewWorkflow()
+
+# Determine if review required
+requirement = workflow.requires_review(
+    verdict="BLOCK",
+    risk_categories=["coordinated_misuse"],
+    statistical_power=0.85,
+    override_requested=True,
+)
+
+# requirement.tier = TIER_3 (Committee review)
+# requirement.sla_hours = 24
+# requirement.escalation_path = ["Safety Lead", "VP Eng", "CEO"]
+```
+
+### Release Risk Ledger
+
+Every release decision is immutably recorded:
+
+```yaml
+entry:
+  entry_id: "LED-12345678"
+  release_id: "release-2026-02-01"
+  model_version: "claude-3.6"
+
+  automated_verdict: "WARN"
+  human_override: true
+  final_outcome: "APPROVED_WITH_CONDITIONS"
+
+  acceptance_record:
+    approver_name: "Jane Smith"
+    approver_role: "Safety Lead"
+    accepted_risks: [...]
+    conditions: ["7-day enhanced monitoring", "Daily safety review"]
+
+  evidence_hash: "sha256:..."
+  previous_entry_hash: "sha256:..."  # Hash chain for tamper evidence
+```
+
+### Audit Export
+
+Generate compliance-ready packages for NIST AI RMF, EU AI Act:
+
+```python
+from governance import AuditExporter, ComplianceStandard
+
+exporter = AuditExporter()
+package = exporter.create_package(
+    release_id="release-2026-02-01",
+    model_version="claude-3.6",
+    purpose="regulatory_submission",
+)
+
+exporter.generate_compliance_report(
+    package,
+    standards=[ComplianceStandard.NIST_AI_RMF, ComplianceStandard.EU_AI_ACT],
+)
+```
+
+---
+
+## Board-Level Reporting
+
+> **Executive-readable reports with constitution compliance and alignment debt.**
+
+### Report Structure
+
+```markdown
+# Board Safety Report
+
+## Executive Summary
+**Overall Status**: 🟡 YELLOW
+**Alignment Debt**: 0.12 (WARN threshold: 0.10)
+
+## Constitution Compliance
+| Principle | Compliance |
+|-----------|------------|
+| P1: Safety Primacy | ████████░░ 80% |
+| P2: Uncertainty → Caution | █████████░ 90% |
+
+## Alignment Debt Trend
+| Period | Added | Resolved | Net |
+|--------|-------|----------|-----|
+| Week 1 | 0.02 | 0.01 | +0.01 |
+| Week 2 | 0.03 | 0.02 | +0.01 |
+
+## Strategic Recommendations
+1. Reduce alignment debt by addressing coverage gaps
+2. Improve P1 compliance through enhanced monitoring
+```
+
+See [`templates/board_report.py`](templates/board_report.py) for implementation.
 
 ---
 
