@@ -563,6 +563,49 @@ This prevents release pipeline flapping from metric noise while maintaining sens
 
 ---
 
+## Anti-Gaming Subsystem
+
+> **Release gates are hardened against metric gaming.**
+
+When safety metrics become targets, they become gameable. The anti-gaming subsystem detects patterns that suggest optimization for metrics rather than genuine safety improvement.
+
+### Components
+
+| Module | Detection Target |
+|--------|-----------------|
+| `anti_gaming/overfitting_detector.py` | Eval-train gap, holdout degradation |
+| `anti_gaming/regression_memorization.py` | Paraphrase failure, template variation failure |
+| `anti_gaming/metric_hacking_alerts.py` | Selective reporting, threshold gaming |
+
+### Detection Signals
+
+```python
+from anti_gaming import OverfittingDetector, MetricHackingMonitor
+
+# Check for overfitting
+detector = OverfittingDetector()
+signals = detector.analyze(
+    known_test_results={"test_1": 0.95, "test_2": 0.92},
+    holdout_results={"holdout_1": 0.65, "holdout_2": 0.70},
+)
+
+# Risk: CRITICAL - eval-train gap of 0.25 detected
+```
+
+### Gaming Patterns Detected
+
+| Pattern | Detection Method | Response |
+|---------|------------------|----------|
+| **Selective Reporting** | Compare reported vs all runs | Flag for review |
+| **Threshold Gaming** | Results clustering near thresholds | Require re-evaluation |
+| **Proxy Divergence** | Official improves, proxy degrades | Human review required |
+| **Memorization** | Paraphrase/variation failure | Refresh benchmark |
+| **Cherry-Picking** | Best-of-N submission | Require mean of runs |
+
+**Philosophy**: Assume teams will optimize for metrics (this is rational). Detect when optimization becomes gaming.
+
+---
+
 ## Design Philosophy
 
 1. **Release gating is a safety control, not a research metric**
