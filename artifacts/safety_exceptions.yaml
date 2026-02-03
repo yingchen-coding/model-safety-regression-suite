@@ -1,0 +1,114 @@
+# Safety Exceptions Ledger
+# ========================
+#
+# Active and historical exceptions to safety freeze rules.
+# Each exception MUST have:
+# - Authorized approver (verified against exception_authority.yaml)
+# - Time-to-live (TTL) with explicit expiration
+# - Justification and audit trail
+# - Linked alignment debts
+#
+# Exceptions are automatically invalidated when:
+# - TTL expires
+# - Approver loses authority
+# - Linked debt is resolved
+# - Max renewals exceeded
+
+version: "2026.02"
+last_updated: "2026-02-02T16:00:00Z"
+
+exceptions:
+  # Active exception for regulatory deadline
+  - exception_id: EX-2026-Q1-001
+    status: active
+
+    approved_by:
+      name: "Alice Chen"
+      role: Head_of_Safety
+      email: "yingchen.for.upload@gmail.com"
+
+    scope:
+      type: alignment_error_budget
+      target: quarterly_budget
+      principles_covered: ["C2"]
+      safeguards_affected: ["policy_erosion_detector"]
+
+    justification: >
+      Regulatory deadline for banking pilot requires release by 2026-02-10.
+      Risk accepted short-term with enhanced monitoring in place.
+      Daily safety review meetings scheduled until debt resolution.
+
+    risk_acceptance:
+      residual_risk: "medium"
+      monitoring_plan: "Daily review of policy erosion alerts"
+      rollback_trigger: "Any policy erosion incident in production"
+
+    approved_at: "2026-02-01T12:00:00Z"
+    ttl_days: 7
+    expires_at: "2026-02-08T12:00:00Z"
+
+    renewals:
+      count: 0
+      max_allowed: 2
+      history: []
+
+    linked_debts:
+      - AD-2026-02-C2
+
+    audit_trail:
+      ticket: "SAFETY-EXC-412"
+      doc: "docs/exceptions/EX-2026-Q1-001.md"
+      approval_evidence: "Email thread + Safety Council minutes"
+      created_by: "Safety Governance System"
+
+  # Expired exception (for demo/audit)
+  - exception_id: EX-2026-Q1-000
+    status: expired
+
+    approved_by:
+      name: "Bob Smith"
+      role: Safety_Director
+      email: "yingchen.for.upload@gmail.com"
+
+    scope:
+      type: debt_slo
+      target: AD-2026-01-C4
+      principles_covered: ["C4"]
+
+    justification: >
+      Statistical power below threshold pending additional evaluation data.
+      Exception to allow continued releases while data collection completes.
+
+    approved_at: "2026-01-15T10:00:00Z"
+    ttl_days: 14
+    expires_at: "2026-01-29T10:00:00Z"
+
+    renewals:
+      count: 1
+      max_allowed: 2
+      history:
+        - renewed_at: "2026-01-29T09:00:00Z"
+          renewed_by: "Bob Smith"
+          new_expires_at: "2026-02-05T10:00:00Z"
+          reason: "Data collection delayed by infrastructure issues"
+
+    linked_debts:
+      - AD-2026-01-C4
+
+    audit_trail:
+      ticket: "SAFETY-EXC-398"
+      postmortem_required: true
+      postmortem_status: "completed"
+      postmortem_link: "docs/postmortems/PM-2026-EXC-000.md"
+
+audit_log:
+  - timestamp: "2026-02-01T12:00:00Z"
+    action: exception_created
+    exception_id: EX-2026-Q1-001
+    actor: "Alice Chen"
+    role: Head_of_Safety
+
+  - timestamp: "2026-01-29T10:00:00Z"
+    action: exception_expired
+    exception_id: EX-2026-Q1-000
+    reason: "TTL exceeded, no further renewal"

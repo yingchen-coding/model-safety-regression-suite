@@ -15,6 +15,27 @@
 
 ---
 
+## 🧊 Safety Freeze Policy
+
+This system enforces **automatic release freeze** when alignment error budget is exceeded or debt SLO is breached.
+
+**Freeze can only be lifted by:**
+- Authorized Safety Exceptions with explicit TTL
+- Approved by: `Head_of_Safety`, `Safety_Director`, or `Oncall_Safety_Manager`
+- Product Managers, Feature Owners, and Engineering Managers **cannot** approve exceptions
+
+**Exception rules:**
+- Maximum TTL: 7-30 days (role-dependent)
+- Maximum consecutive renewals: 2
+- Postmortem required for exceptions > 7 days
+- All exceptions audited in `gate_report.html`
+
+**Why this exists:** Decision authority must be separated from delivery pressure. No one with a vested interest in shipping can unilaterally override safety blocks.
+
+See [`config/exception_authority.yaml`](config/exception_authority.yaml) for full governance configuration.
+
+---
+
 ## Realistic Failure This Repo Prevents
 
 **The 2023-2024 Pattern**: Teams relied on static red-teaming before releases. Models passed single-turn safety benchmarks but exhibited:
