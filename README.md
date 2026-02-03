@@ -360,12 +360,67 @@ model-safety-regression-suite/
 │   └── policy_exception.yaml   # Controlled overrides
 ├── reports/
 │   └── html.py            # HTML report generator
+├── scripts/               # Governance utility scripts ⭐
+│   ├── generate_board_brief.py
+│   ├── generate_executive_dashboard.py
+│   ├── generate_safety_roi_model.py
+│   ├── optimize_safety_portfolio.py
+│   └── ... (13 scripts)
 ├── data/
 │   └── .gitkeep           # Traffic data storage
 ├── docs/
 │   └── design.md          # Release gating philosophy
 ├── run_regression.py      # CLI entry point
 └── requirements.txt
+```
+
+---
+
+## Governance Scripts
+
+The `scripts/` directory contains utility scripts for board-level governance and reporting:
+
+### Reporting & Dashboards
+
+| Script | Purpose |
+|--------|---------|
+| `generate_board_brief.py` | Generate 1-page executive summary when release is BLOCKED |
+| `generate_executive_dashboard.py` | Unified board-level HTML dashboard |
+| `generate_safety_investment_recommendation.py` | Quarterly investment recommendations |
+| `gen_roi_curve_and_heatmap.py` | ROI curve + threat heatmap visualizations |
+
+### Alignment Debt & Error Budget
+
+| Script | Purpose |
+|--------|---------|
+| `calc_alignment_debt_kpi.py` | Compute debt aging KPIs for dashboards |
+| `check_alignment_debt_slo.py` | Enforce 14/30/60-day SLOs by severity |
+| `check_alignment_error_budget.py` | Verify quarterly error budget compliance |
+
+### Exception Governance
+
+| Script | Purpose |
+|--------|---------|
+| `check_safety_exceptions.py` | Validate active exceptions against policy |
+| `check_exception_blast_radius.py` | Enforce max 5 safeguards + 3 principles per exception |
+| `generate_exception_audit_report.py` | Generate audit trail for board review |
+
+### Constitution & Safety
+
+| Script | Purpose |
+|--------|---------|
+| `generate_constitution_audit.py` | Verify constitution principles are enforced |
+| `check_freeze_playbook.py` | Check if safety freeze conditions are met |
+| `generate_safety_roi_model.py` | Financial risk model for board communication |
+| `optimize_safety_portfolio.py` | Budget → top-3 safeguard investment allocation |
+
+**Usage Example:**
+```bash
+# Generate board-level dashboard after BLOCK verdict
+python scripts/generate_executive_dashboard.py --release release-2026-02-01
+
+# Check if error budget allows release
+python scripts/check_alignment_error_budget.py --quarter Q1-2026
 ```
 
 ---
